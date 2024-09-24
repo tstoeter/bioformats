@@ -44,6 +44,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.TreeMap;
 import java.util.SortedMap;
+import java.util.Scanner;
+import java.util.Arrays;
 
 import loci.common.Constants;
 import loci.common.DataTools;
@@ -1352,9 +1354,40 @@ public final class ImageConverter {
 
   public static void main(String[] args) throws FormatException, IOException {
     DebugTools.enableLogging("INFO");
-    ImageConverter converter = new ImageConverter();
-    if (!converter.testConvert(new ImageWriter(), args)) System.exit(1);
-    System.exit(0);
-  }
 
+    int exitCode = 0;
+    List<String> argsList = Arrays.asList(args);
+    int idx = argsList.indexOf("-");
+
+    if (idx >= 0)
+    {
+      Scanner scanner = new Scanner(System.in);
+      String[] newArgs = argsList.toArray(new String[0]);
+
+      while (scanner.hasNext())
+      {
+        newArgs[idx] = scanner.nextLine();
+        System.out.println("====% " + newArgs[idx]);
+        try
+        {
+          ImageConverter converter = new ImageConverter();
+          if (!converter.testConvert(new ImageWriter(), newArgs)) exitCode = 1;
+        }
+        catch (Exception e)
+        {
+          LOGGER.error("Caught " + e.getClass().getSimpleName(), e);
+          exitCode = 1;
+          continue;
+        }
+      }
+      scanner.close();
+    }
+    else
+    {
+      ImageConverter converter = new ImageConverter();
+      if (!converter.testConvert(new ImageWriter(), args)) System.exit(1);
+    }
+
+    System.exit(exitCode);
+  }
 }
